@@ -1,0 +1,10 @@
+*.class
+*.jar
+.DS_Store
+/.classpath
+/.project
+/.settings/
+bin/
+out/
+target/
+*.exe
