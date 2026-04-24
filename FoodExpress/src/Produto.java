@@ -1,17 +1,17 @@
 public class Produto {
-    // 1. Atributos private (Encapsulamento)
-    private int codigo;
-    private String nome;
-    private double preco;
+    // 1. Mudança de private para PROTECTED (Exigência do CP2 para Herança)
+    protected int codigo;
+    protected String nome;
+    protected double preco;
 
-    // 2. Construtor adequado
+    // 2. Construtor continua igual
     public Produto(int codigo, String nome, double preco) {
         setCodigo(codigo);
         setNome(nome);
         setPreco(preco);
     }
 
-    // 3. Getters e Setters com Validações
+    // 3. Getters e Setters com Validações continuam iguais
     public int getCodigo() { return codigo; }
 
     public void setCodigo(int codigo) {
@@ -42,9 +42,14 @@ public class Produto {
         }
     }
 
-    // 4. Método toString()
+    
+    public String obterDetalhes() {
+        return "Produto Genérico";
+    }
+
+    // 5. Método toString() modificado levemente para não ficar repetindo a palavra "Produto"
     @Override
     public String toString() {
-        return "Produto [Código: " + codigo + " | Nome: " + nome + " | Preço: R$" + String.format("%.2f", preco) + "]";
+        return "Código: " + codigo + " | Nome: " + nome + " | Preço: R$" + String.format("%.2f", preco);
     }
 }

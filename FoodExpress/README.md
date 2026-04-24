@@ -1,62 +1,72 @@
 # Sistema de Gerenciamento de Delivery (FoodExpress)
 
-**Tema Escolhido:** Delivery
-**Integrantes do Grupo:** 
-
- Apollo Moura de Sousa- RGM: 46162232
- Cristiano Souza Santos - RGM: 45689385
- Felipe da Fonseca Silva - RGM: 44982887
- Jonathan de Souza - RGM: - 45268908
- Igor Alves Ferreira - RGM: - 44779542
- Lucas Costa de Lima - RGM: - 45850259
- 
-
+**Tema Escolhido:** Delivery  
+**Integrantes do Grupo:** - Apollo Moura de Sousa - RGM: 46162232
+- Cristiano Souza Santos - RGM: 45689385
+- Felipe da Fonseca Silva - RGM: 44982887
+- Jonathan de Souza - RGM: 45268908
+- Igor Alves Ferreira - RGM: 44779542
+- Lucas Costa de Lima - RGM: 45850259
 
 ## Objetivo do Sistema
-O sistema FoodExpress tem como objetivo principal gerenciar as operações diárias de um aplicativo de delivery de alimentos. Ele visa facilitar a interação entre clientes, restaurantes (produtos) e a logística de entrega. 
+O sistema FoodExpress tem como objetivo principal gerenciar as operações diárias de um aplicativo de delivery de alimentos. Ele visa facilitar a interação entre clientes, restaurantes parceiros, produtos disponíveis e a logística de entrega. 
 
-Através do sistema, será possível manter um controle rigoroso sobre o catálogo de itens disponíveis, registrar os usuários que farão os pedidos e acompanhar o ciclo de vida de uma entrega. Isso resolve o problema de desorganização no recebimento de pedidos manuais e perda de informações sobre as entregas.
+Através do sistema, é possível manter um controle rigoroso (CRUD) sobre o catálogo de itens, registrar clientes, acompanhar a frota de entregadores e gerenciar todo o ciclo de vida de um pedido (desde o carrinho de compras até a entrega final). Isso resolve o problema de desorganização no recebimento de pedidos manuais e centraliza a gestão.
 
-## Funcionalidades Principais (Mínimo 5)
-1. Cadastro e gerenciamento de Clientes.
-2. Cadastro e controle de Produtos (cardápio).
-3. Registro de novos Pedidos (carrinho de compras).
-4. Cadastro de Entregadores.
-5. Acompanhamento do status do pedido (Preparando, Saiu para Entrega, Entregue).
+## Funcionalidades Principais
+O sistema conta com operações completas de CRUD (Create, Read, Update, Delete) para as seguintes áreas:
+1. **Gerenciamento de Restaurantes:** Cadastro, listagem, edição e exclusão de restaurantes.
+2. **Gerenciamento de Produtos:** Controle de catálogo de vendas e preços.
+3. **Gerenciamento de Clientes:** Controle de usuários cadastrados para realizar pedidos.
+4. **Gerenciamento de Entregadores:** Controle de frota, placas e status de entregadores.
+5. **Gestão de Pedidos:** Criação de pedidos com adição interativa de múltiplos itens ao carrinho, atribuição de entregadores e atualização de status (Ex: Em preparo, Entregue).
+6. **Relatórios:** Visão geral automatizada das entidades do sistema.
 
-## Estrutura de Classes Planejada
-1. `Cliente`: Representa o usuário que faz o pedido.
-2. `Produto`: Representa o item do cardápio (ex: lanche, bebida).
-3. `Pedido`: Representa a transação em si, vinculando o Cliente aos Produtos.
-4. `ItemPedido`: Representa a quantidade de um Produto específico dentro de um Pedido.
-5. `Entregador`: Representa o profissional responsável por levar o pedido.
+## Estrutura de Classes (6 Classes implementadas)
+## Estrutura de Classes (8 Classes implementadas)
+1. `Restaurante`: Representa os estabelecimentos parceiros.
+2. `Cliente`: Representa o usuário que faz o pedido.
+3. `Produto`: Superclasse base para itens do cardápio.
+   - `Comida`: Subclasse de Produto (com atributo peso em gramas).
+   - `Bebida`: Subclasse de Produto (com atributo volume em ml).
+4. `Pedido`: Classe central que vincula Cliente, Entregador e a lista de Produtos.
+5. `ItemPedido`: Classe associativa que gerencia a quantidade de um Produto específico em um Pedido.
+6. `Entregador`: Representa o profissional e seu veículo para a logística.
 
 ## Regra de Negócio Complexa
-**Cálculo do Valor Total com Taxa de Entrega Dinâmica:** O valor total do pedido não será apenas a soma dos produtos. Ele deverá calcular o subtotal dos itens e aplicar uma validação: se o subtotal for menor que R$ 30,00, aplica-se uma taxa fixa de entrega de R$ 8,00. Se for maior que R$ 30,00, o frete é grátis. Além disso, pedidos não podem ser finalizados se a lista de itens estiver vazia.
+**Cálculo de Valor Total com Descontos Progressivos:** O sistema realiza o cálculo da fatura do pedido em 4 etapas detalhadas:
+1. **Subtotal:** Soma o preço de todos os produtos multiplicados por suas respectivas quantidades.
+2. **Descontos Progressivos:** Avalia o subtotal e aplica reduções automáticas:
+   - 15% de desconto para pedidos acima de R$ 300,00
+   - 10% de desconto para pedidos acima de R$ 200,00
+   - 5% de desconto para pedidos acima de R$ 100,00
+3. **Logística:** Adiciona uma taxa de entrega fixa de R$ 8,00.
+4. **Cupom Fiscal:** Exibe no console um resumo detalhado informando o subtotal, o valor do desconto aplicado (e sua porcentagem), a taxa fixa e o valor final a ser pago pelo cliente.
 
-# Meu Projeto Java
+---
 
----O FoodExpress é um sistema de gerenciamento de delivery desenvolvido em Java, projetado para organizar e automatizar a rotina de um estabelecimento de entrega de alimentos. O sistema atua como um intermediário eficiente entre o restaurante, o cliente e a logística de entrega.
- 
+# Sobre o Projeto (FoodExpress)
+
+O FoodExpress é um sistema desenvolvido inteiramente em Java, projetado para aplicar conceitos de Orientação a Objetos (Encapsulamento, Relacionamentos, Listas e Validações) automatizando a rotina de um estabelecimento de entrega. O sistema atua no terminal rodando "em memória" utilizando `ArrayList` para persistência em tempo de execução.
 
 ## Como executar
+
+Pelo terminal, navegue até a pasta raiz do projeto e execute os comandos:
 
 ```bash
 javac src/*.java
 java -cp src Main
-```
 
-## Estrutura do Projeto
-
-```
-seu-projeto/
+FoodExpress/
 ├── README.md
 ├── src/
+│   ├── Bebida.java
 │   ├── Cliente.java
+│   ├── Comida.java
 │   ├── Entregador.java
 │   ├── ItemPedido.java
 │   ├── Main.java
 │   ├── Pedido.java
-│   └── Produto.java
+│   ├── Produto.java
+│   └── Restaurante.java
 └── .gitignore
-```
