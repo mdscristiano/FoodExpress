@@ -1,3 +1,5 @@
+package model;
+
 public class ItemPedido {
     // 1. Atributos private
     private Produto produto;

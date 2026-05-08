@@ -1,4 +1,7 @@
-public class Produto {
+package model;
+
+// 1. Adicionada a palavra "abstract" na declaração da classe
+public abstract class Produto {
     // 1. Mudança de private para PROTECTED (Exigência do CP2 para Herança)
     protected int codigo;
     protected String nome;
@@ -42,10 +45,8 @@ public class Produto {
         }
     }
 
-    
-    public String obterDetalhes() {
-        return "Produto Genérico";
-    }
+    // 4. Método alterado para abstrato (sem corpo, termina com ponto e vírgula)
+    public abstract String obterDetalhes();
 
     // 5. Método toString() modificado levemente para não ficar repetindo a palavra "Produto"
     @Override

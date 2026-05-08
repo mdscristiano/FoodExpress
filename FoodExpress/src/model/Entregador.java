@@ -1,3 +1,5 @@
+package model;
+
 public class Entregador {
     private String nome;
     private String placaVeiculo;

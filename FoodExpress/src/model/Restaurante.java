@@ -1,3 +1,5 @@
+package model;
+
 public class Restaurante {
     private int codigo;
     private String nome;

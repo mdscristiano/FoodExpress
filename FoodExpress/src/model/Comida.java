@@ -1,3 +1,5 @@
+package model;
+
 public class Comida extends Produto {
     private double pesoGramas;
 
