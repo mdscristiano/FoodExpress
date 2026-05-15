@@ -25,7 +25,14 @@ CREATE TABLE produtos (
     codigo INT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     preco NUMERIC(10, 2) NOT NULL
+    
+ALTER TABLE produtos ADD COLUMN codigo_restaurante INT;
+ALTER TABLE produtos ADD CONSTRAINT fk_produto_restaurante 
+FOREIGN KEY (codigo_restaurante) REFERENCES restaurantes(codigo) ON DELETE CASCADE;
 );
+
+
+
 
 CREATE TABLE comidas (
     codigo_produto INT PRIMARY KEY,

@@ -5,7 +5,7 @@ import java.util.Scanner;
 // Importar as classes do pacote model
 import model.Cliente;
 import model.Entregador;
-import model.ItemPedido;
+
 import model.Pedido;
 import model.Produto;
 import model.Restaurante;
@@ -15,34 +15,36 @@ import model.Bebida;
 // Importar os DAOs
 import dao.ClienteDAO;
 import dao.RestauranteDAO;
+import dao.ProdutoDAO;
+import dao.EntregadorDAO; 
+import dao.PedidoDAO;
 
 public class Main {
-    // Usando Listas para Produtos, Entregadores e Pedidos (em memória por enquanto)
-    static List<Produto> listaProdutos = new ArrayList<>();
-    static List<Entregador> listaEntregadores = new ArrayList<>();
     static List<Pedido> listaPedidos = new ArrayList<>();
     
-    // As listas de Clientes e Restaurantes foram removidas daqui porque agora usamos o Banco de Dados!
-    
     static Scanner scanner = new Scanner(System.in);
+    static ProdutoDAO produtoDAO = new ProdutoDAO();
+    static EntregadorDAO entregadorDAO = new EntregadorDAO(); 
+    static PedidoDAO pedidoDAO = new PedidoDAO(); 
 
     public static void main(String[] args) {
         int opcao = -1;
 
         while (opcao != 0) {
             System.out.println("\n===== SISTEMA DELIVERY (FoodExpress) =====");
+
             System.out.println("1. Gerenciar Restaurantes (Banco de Dados)");
-            System.out.println("2. Gerenciar Produtos");
+            System.out.println("2. Gerenciar Produtos (Banco de Dados)");
             System.out.println("3. Gerenciar Clientes (Banco de Dados)");
-            System.out.println("4. Gerenciar Entregadores");
-            System.out.println("5. Gerenciar Pedidos");
-            System.out.println("6. Relatórios");
+            System.out.println("4. Gerenciar Entregadores (Banco de Dados)"); 
+            System.out.println("5. Gerenciar Pedidos (Banco de Dados)");
+            System.out.println("6. Relatório Financeiro (Vendas por Restaurante)");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
 
             if (scanner.hasNextInt()) {
                 opcao = scanner.nextInt();
-                scanner.nextLine(); // Limpar o buffer
+                scanner.nextLine();
             } else {
                 System.out.println("Entrada inválida. Digite um número.");
                 scanner.next(); 
@@ -50,375 +52,213 @@ public class Main {
             }
 
             switch (opcao) {
-                case 1:
-                    menuRestaurantes();
-                    break;
-                case 2:
-                    menuProdutos();
-                    break;
-                case 3:
-                    menuClientes();
-                    break;
-                case 4:
-                    menuEntregadores();
-                    break;
-                case 5:
-                    menuPedidos();
-                    break;
-                case 6:
-                    gerarRelatorios();
-                    break;
-                case 0:
-                    System.out.println("Encerrando o sistema... Até logo!");
-                    break;
-                default:
-                    System.out.println("Opção inválida! Tente novamente.");
+                case 1: menuRestaurantes(); break;
+                case 2: menuProdutos(); break;
+                case 3: menuClientes(); break;
+                case 4: menuEntregadores(); break;
+                case 5: menuPedidos(); break;
+                case 6: gerarRelatorios(); break;
+                case 0: System.out.println("Encerrando o sistema... Até logo!"); break;
+                default: System.out.println("Opção inválida! Tente novamente.");
             }
         }
         scanner.close();
     }
 
     // ==========================================
-    // 1. GERENCIAR RESTAURANTES (Integrado com Banco de Dados via DAO)
+    // 1. GERENCIAR RESTAURANTES (Persistência DB)
     // ==========================================
     private static void menuRestaurantes() {
         System.out.println("\n--- GERENCIAR RESTAURANTES (DB) ---");
-        System.out.println("1. Cadastrar Restaurante");
-        System.out.println("2. Listar Restaurantes");
-        System.out.println("3. Editar Restaurante");
-        System.out.println("4. Excluir Restaurante");
+        System.out.println("1. Cadastrar | 2. Listar | 3. Atualizar | 4. Excluir");
         System.out.print("Escolha: ");
-        int op = scanner.nextInt();
-        scanner.nextLine();
+        int op = scanner.nextInt(); scanner.nextLine();
 
-        // Instancia o DAO
         RestauranteDAO restauranteDAO = new RestauranteDAO();
 
-        if (op == 1) { // CREATE
-            System.out.print("Digite o código do restaurante: ");
-            int cod = scanner.nextInt(); scanner.nextLine();
-            System.out.print("Nome do restaurante: ");
-            String nome = scanner.nextLine();
-            System.out.print("Especialidade (ex: Japonesa, Pizzaria): ");
-            String esp = scanner.nextLine();
-            
-            Restaurante novoRestaurante = new Restaurante(cod, nome, esp);
-            restauranteDAO.inserir(novoRestaurante); // Grava no banco
-        } 
-        else if (op == 2) { // READ
-            System.out.println("\n--- LISTA DE RESTAURANTES ---");
-            List<Restaurante> restaurantesBanco = restauranteDAO.listarTodos(); // Busca do banco
-            
-            if (restaurantesBanco.isEmpty()) {
-                System.out.println("Nenhum restaurante cadastrado no banco.");
-            } else {
-                for (Restaurante r : restaurantesBanco) {
-                    System.out.println(r);
-                }
-            }
-        } 
-        else if (op == 3) { // UPDATE
-            System.out.print("Código do restaurante a editar: ");
-            int cod = scanner.nextInt(); scanner.nextLine();
-            System.out.print("Novo nome: "); 
-            String nome = scanner.nextLine();
-            System.out.print("Nova especialidade: "); 
-            String esp = scanner.nextLine();
-            
-            Restaurante restauranteAtualizado = new Restaurante(cod, nome, esp);
-            restauranteDAO.atualizar(restauranteAtualizado); // Atualiza no banco
-        } 
-        else if (op == 4) { // DELETE
-            System.out.print("Código do restaurante a excluir: ");
-            int cod = scanner.nextInt(); scanner.nextLine();
-            restauranteDAO.excluir(cod); // Apaga do banco
+        if (op == 1) { 
+            System.out.print("Código: "); int cod = scanner.nextInt(); scanner.nextLine();
+            System.out.print("Nome: "); String nome = scanner.nextLine();
+            System.out.print("Especialidade: "); String esp = scanner.nextLine();
+            restauranteDAO.inserir(new Restaurante(cod, nome, esp)); 
+        } else if (op == 2) { 
+            List<Restaurante> lista = restauranteDAO.listarTodos(); 
+            if (lista.isEmpty()) System.out.println("Vazio.");
+            else lista.forEach(System.out::println);
+        } else if (op == 3) {
+            System.out.print("Código do restaurante a atualizar: "); int cod = scanner.nextInt(); scanner.nextLine();
+            System.out.print("Novo Nome: "); String nome = scanner.nextLine();
+            System.out.print("Nova Especialidade: "); String esp = scanner.nextLine();
+            restauranteDAO.atualizar(new Restaurante(cod, nome, esp));
+        } else if (op == 4) {
+            System.out.print("Código para excluir: ");
+            restauranteDAO.excluir(scanner.nextInt());
+        } else {
+            System.out.println("Opção inválida.");
         }
     }
 
     // ==========================================
-    // 2. GERENCIAR PRODUTOS (Classe Abstrata)
+    // 2. GERENCIAR PRODUTOS (Persistência DB)
     // ==========================================
     private static void menuProdutos() {
-        System.out.println("\n--- GERENCIAR PRODUTOS ---");
-        System.out.println("1. Cadastrar Produto");
-        System.out.println("2. Listar Produtos");
-        System.out.println("3. Editar Produto");
-        System.out.println("4. Excluir Produto");
+        System.out.println("\n--- GERENCIAR PRODUTOS (DB) ---");
+        System.out.println("1. Cadastrar | 2. Listar | 3. Atualizar | 4. Excluir");
         System.out.print("Escolha: ");
-        int op = scanner.nextInt();
-        scanner.nextLine();
+        int op = scanner.nextInt(); scanner.nextLine();
 
         if (op == 1) {
-            System.out.print("Digite o código do produto: ");
-            int cod = scanner.nextInt();
-            scanner.nextLine();
-            System.out.print("Digite o nome do produto: ");
-            String nome = scanner.nextLine();
-            System.out.print("Digite o preço do produto: ");
-            double preco = scanner.nextDouble();
-            scanner.nextLine();
+            List<Restaurante> rests = new RestauranteDAO().listarTodos();
+            if (rests.isEmpty()) { System.out.println("Cadastre um restaurante primeiro."); return; }
             
-            // Decidir se é Comida ou Bebida (pois Produto é abstrato)
-            System.out.println("Tipo de Produto: [1] Comida  [2] Bebida");
-            int tipo = scanner.nextInt();
-            scanner.nextLine();
-            
-            if (tipo == 1) {
-                System.out.print("Digite o peso em gramas: ");
-                double peso = scanner.nextDouble(); scanner.nextLine();
-                listaProdutos.add(new Comida(cod, nome, preco, peso));
-                System.out.println("✅ Comida cadastrada com sucesso!");
-            } else if (tipo == 2) {
-                System.out.print("Digite o volume em ml: ");
-                int volume = scanner.nextInt(); scanner.nextLine();
-                listaProdutos.add(new Bebida(cod, nome, preco, volume));
-                System.out.println("✅ Bebida cadastrada com sucesso!");
-            } else {
-                System.out.println("❌ Tipo inválido. Registo cancelado.");
-            }
-            
-        } else if (op == 2) {
-            System.out.println("\n--- LISTA DE PRODUTOS ---");
-            if (listaProdutos.isEmpty()) System.out.println("Nenhum produto cadastrado.");
-            for (Produto p : listaProdutos) {
-                System.out.println(p.toString() + " | Detalhe: " + p.obterDetalhes());
-            }
-        } else if (op == 3) {
-            System.out.print("Código do produto a editar: ");
-            int cod = scanner.nextInt(); scanner.nextLine();
-            for (Produto p : listaProdutos) {
-                if (p.getCodigo() == cod) {
-                    System.out.print("Novo nome: "); p.setNome(scanner.nextLine());
-                    System.out.print("Novo preço: "); p.setPreco(scanner.nextDouble());
-                    System.out.println("✅ Produto atualizado!"); return;
+            rests.forEach(r -> System.out.println(r.getCodigo() + " - " + r.getNome()));
+            System.out.print("Código do restaurante: ");
+            int idRest = scanner.nextInt(); scanner.nextLine();
+            Restaurante res = rests.stream().filter(r -> r.getCodigo() == idRest).findFirst().orElse(null);
+
+            if(res != null) {
+                System.out.print("Código Produto: "); int cod = scanner.nextInt(); scanner.nextLine();
+                System.out.print("Nome: "); String nome = scanner.nextLine();
+                System.out.print("Preço: "); double preco = scanner.nextDouble();
+                System.out.print("Tipo [1] Comida [2] Bebida: "); int tipo = scanner.nextInt();
+                
+                if (tipo == 1) {
+                    System.out.print("Peso (g): ");
+                    produtoDAO.inserir(new Comida(cod, nome, preco, res, scanner.nextDouble()));
+                } else {
+                    System.out.print("Volume (ml): ");
+                    produtoDAO.inserir(new Bebida(cod, nome, preco, res, scanner.nextInt()));
                 }
+            } else {
+                System.out.println("Restaurante não encontrado.");
             }
-            System.out.println("❌ Produto não encontrado.");
+        } else if (op == 2) {
+            produtoDAO.listarTodos().forEach(p -> System.out.println(p + " | " + p.obterDetalhes()));
+        } else if (op == 3) {
+            System.out.print("Código do produto a atualizar: "); int cod = scanner.nextInt(); scanner.nextLine();
+            System.out.print("Novo Nome: "); String nome = scanner.nextLine();
+            System.out.print("Novo Preço: "); double preco = scanner.nextDouble();
+            produtoDAO.atualizar(cod, nome, preco);
         } else if (op == 4) {
-            System.out.print("Código do produto a excluir: ");
-            int cod = scanner.nextInt(); scanner.nextLine();
-            if (listaProdutos.removeIf(p -> p.getCodigo() == cod)) System.out.println("✅ Produto excluído!");
-            else System.out.println("❌ Produto não encontrado.");
+            System.out.print("Código para excluir: ");
+            produtoDAO.excluir(scanner.nextInt());
+        } else {
+            System.out.println("Opção inválida.");
         }
     }
 
     // ==========================================
-    // 3. GERENCIAR CLIENTES (Integrado com Banco de Dados via DAO)
+    // 3. GERENCIAR CLIENTES (Persistência DB)
     // ==========================================
     private static void menuClientes() {
         System.out.println("\n--- GERENCIAR CLIENTES (DB) ---");
-        System.out.println("1. Cadastrar Cliente");
-        System.out.println("2. Listar Clientes");
-        System.out.println("3. Editar Cliente");
-        System.out.println("4. Excluir Cliente");
-        System.out.print("Escolha: ");
-        int op = scanner.nextInt();
-        scanner.nextLine();
-
-        // Instancia o DAO
         ClienteDAO clienteDAO = new ClienteDAO();
+        System.out.println("1. Cadastrar | 2. Listar | 3. Atualizar | 4. Excluir");
+        System.out.print("Escolha: ");
+        int op = scanner.nextInt(); scanner.nextLine();
 
-        if (op == 1) { // CREATE
-            System.out.print("Digite o CPF (11 números): ");
-            String cpf = scanner.nextLine();
-            System.out.print("Digite o nome do cliente: ");
-            String nome = scanner.nextLine();
-            System.out.print("Digite o endereço completo: ");
-            String end = scanner.nextLine();
-            
-            Cliente novoCliente = new Cliente(cpf, nome, end);
-            clienteDAO.inserir(novoCliente); // Chama o banco
-
-        } else if (op == 2) { // READ
-            System.out.println("\n--- LISTA DE CLIENTES ---");
-            List<Cliente> clientesDoBanco = clienteDAO.listarTodos(); // Busca do banco
-            
-            if (clientesDoBanco.isEmpty()) {
-                System.out.println("Nenhum cliente cadastrado no banco.");
-            } else {
-                for (Cliente c : clientesDoBanco) {
-                    System.out.println(c);
-                }
-            }
-        } else if (op == 3) { // UPDATE
-            System.out.print("CPF do cliente a editar: ");
-            String cpf = scanner.nextLine();
-            System.out.print("Novo nome: "); 
-            String nome = scanner.nextLine();
-            System.out.print("Novo endereço: "); 
-            String end = scanner.nextLine();
-            
-            Cliente clienteAtualizado = new Cliente(cpf, nome, end);
-            clienteDAO.atualizar(clienteAtualizado); // Atualiza no banco
-
-        } else if (op == 4) { // DELETE
-            System.out.print("CPF do cliente a excluir: ");
-            String cpf = scanner.nextLine();
-            clienteDAO.excluir(cpf); // Exclui do banco
+        if (op == 1) {
+            System.out.print("CPF: "); String cpf = scanner.nextLine();
+            System.out.print("Nome: "); String nome = scanner.nextLine();
+            System.out.print("Endereço: "); String end = scanner.nextLine();
+            clienteDAO.inserir(new Cliente(cpf, nome, end));
+        } else if (op == 2) {
+            clienteDAO.listarTodos().forEach(System.out::println);
+        } else if (op == 3) {
+            System.out.print("CPF do cliente a atualizar: "); String cpf = scanner.nextLine();
+            System.out.print("Novo Nome: "); String nome = scanner.nextLine();
+            System.out.print("Novo Endereço: "); String end = scanner.nextLine();
+            clienteDAO.atualizar(new Cliente(cpf, nome, end));
+        } else if (op == 4) {
+            System.out.print("CPF para excluir: "); String cpf = scanner.nextLine();
+            clienteDAO.excluir(cpf);
+        } else {
+            System.out.println("Opção inválida.");
         }
     }
 
     // ==========================================
-    // 4. GERENCIAR ENTREGADORES
+    // 4. GERENCIAR ENTREGADORES (Persistência DB)
     // ==========================================
     private static void menuEntregadores() {
-        System.out.println("\n--- GERENCIAR ENTREGADORES ---");
-        System.out.println("1. Cadastrar Entregador");
-        System.out.println("2. Listar Entregadores");
-        System.out.println("3. Editar Entregador");
-        System.out.println("4. Excluir Entregador");
+        System.out.println("\n--- GERENCIAR ENTREGADORES (DB) ---");
+        System.out.println("1. Cadastrar | 2. Listar | 3. Atualizar | 4. Excluir");
         System.out.print("Escolha: ");
-        int op = scanner.nextInt();
-        scanner.nextLine();
+        int op = scanner.nextInt(); scanner.nextLine();
 
         if (op == 1) {
-            System.out.print("Digite o nome do entregador: ");
-            String nome = scanner.nextLine();
-            System.out.print("Digite a placa do veículo: ");
-            String placa = scanner.nextLine();
-            
-            listaEntregadores.add(new Entregador(nome, placa));
-            System.out.println("✅ Entregador cadastrado com sucesso!");
+            System.out.print("Nome: "); String nome = scanner.nextLine();
+            System.out.print("Placa: "); String placa = scanner.nextLine();
+            entregadorDAO.inserir(new Entregador(nome, placa));
         } else if (op == 2) {
-            System.out.println("\n--- LISTA DE ENTREGADORES ---");
-            if (listaEntregadores.isEmpty()) System.out.println("Nenhum entregador cadastrado.");
-            for (Entregador e : listaEntregadores) System.out.println(e);
+            List<Entregador> lista = entregadorDAO.listarTodos();
+            if (lista.isEmpty()) System.out.println("Nenhum entregador no banco.");
+            else lista.forEach(System.out::println);
         } else if (op == 3) {
-            System.out.print("Placa do entregador a editar: ");
-            String placa = scanner.nextLine();
-            for (Entregador e : listaEntregadores) {
-                if (e.getPlacaVeiculo().equalsIgnoreCase(placa)) {
-                    System.out.print("Novo nome: "); e.setNome(scanner.nextLine());
-                    System.out.println("✅ Entregador atualizado!"); return;
-                }
-            }
-            System.out.println("❌ Entregador não encontrado.");
+            System.out.print("Placa do entregador a atualizar: "); String placa = scanner.nextLine();
+            System.out.print("Novo Nome: "); String nome = scanner.nextLine();
+            System.out.print("Disponível? (true/false): "); boolean disp = scanner.nextBoolean(); scanner.nextLine();
+            Entregador e = new Entregador(nome, placa);
+            e.setDisponivel(disp);
+            entregadorDAO.atualizar(e);
         } else if (op == 4) {
-            System.out.print("Placa do entregador a excluir: ");
-            String placa = scanner.nextLine();
-            if (listaEntregadores.removeIf(e -> e.getPlacaVeiculo().equalsIgnoreCase(placa))) System.out.println("✅ Entregador excluído!");
-            else System.out.println("❌ Entregador não encontrado.");
+            System.out.print("Placa para excluir: "); String placa = scanner.nextLine();
+            entregadorDAO.excluir(placa);
+        } else {
+            System.out.println("Opção inválida.");
         }
     }
 
     // ==========================================
-    // 5. GERENCIAR PEDIDOS
+    // 5. GERENCIAR PEDIDOS (Persistência DB)
     // ==========================================
     private static void menuPedidos() {
-        System.out.println("\n--- GERENCIAR PEDIDOS ---");
-        System.out.println("1. Criar Novo Pedido");
-        System.out.println("2. Listar Pedidos");
-        System.out.println("3. Atualizar Status do Pedido");
-        System.out.println("4. Excluir Pedido");
-        System.out.print("Escolha: ");
-        int op = scanner.nextInt();
-        scanner.nextLine();
+        System.out.println("\n--- NOVO PEDIDO ---");
+        List<Cliente> clientes = new ClienteDAO().listarTodos();
+        List<Produto> cardapio = produtoDAO.listarTodos();
+        List<Entregador> entregadores = entregadorDAO.listarTodos();
 
-        ClienteDAO clienteDAO = new ClienteDAO();
+        if (clientes.isEmpty() || cardapio.isEmpty()) {
+            System.out.println("❌ Erro: Cadastre clientes e produtos no banco primeiro.");
+            return;
+        }
 
-        if (op == 1) {
-            List<Cliente> clientesDoBanco = clienteDAO.listarTodos();
+        for(Cliente c : clientes) System.out.println(c.getCpf() + " - " + c.getNome());
+        System.out.print("CPF do cliente: ");
+        String cpf = scanner.nextLine();
+        Cliente selecionado = clientes.stream().filter(c -> c.getCpf().equals(cpf)).findFirst().orElse(null);
+
+        if(selecionado != null) {
+            for(Produto p : cardapio) System.out.println(p.getCodigo() + " - " + p.getNome());
+            System.out.print("Código do produto: ");
+            int codP = scanner.nextInt();
+            Produto prod = cardapio.stream().filter(p -> p.getCodigo() == codP).findFirst().orElse(null);
             
-            if (clientesDoBanco.isEmpty() || listaProdutos.isEmpty()) {
-                System.out.println("❌ Erro: Cadastre pelo menos 1 cliente no banco e 1 produto antes de criar um pedido.");
-                return;
-            }
-
-            // Exibir clientes para escolha
-            System.out.println("\n--- Escolha um Cliente ---");
-            for (Cliente c : clientesDoBanco) System.out.println("CPF: " + c.getCpf() + " | Nome: " + c.getNome());
-            System.out.print("Digite o CPF do cliente escolhido: ");
-            String cpfBusca = scanner.nextLine();
-            
-            Cliente clienteSelecionado = null;
-            for(Cliente c : clientesDoBanco) {
-                if(c.getCpf().equals(cpfBusca)) clienteSelecionado = c;
-            }
-            if(clienteSelecionado == null) {
-                System.out.println("❌ Cliente não encontrado!"); return;
-            }
-
-            int numPedido = listaPedidos.size() + 1001;
-            Pedido novoPedido = new Pedido(numPedido, clienteSelecionado);
-            
-            // Exibir produtos para escolha (adicionar vários itens)
-            boolean adicionando = true;
-            while(adicionando) {
-                System.out.println("\n--- Escolha um Produto ---");
-                for (Produto p : listaProdutos) System.out.println("Código: " + p.getCodigo() + " | Nome: " + p.getNome() + " | Preço: R$" + p.getPreco());
-                System.out.print("Digite o CÓDIGO do produto (ou 0 para finalizar os itens): ");
-                int codBusca = scanner.nextInt(); scanner.nextLine();
+                   //Menu para selecionar quantidade
+            if(prod != null) {
+                Pedido p = new Pedido(listaPedidos.size() + 101, selecionado, prod.getRestaurante());
+                p.adicionarItem(prod, 3);
                 
-                if (codBusca == 0) {
-                    break;
+                // Atribui primeiro entregador disponível do banco
+                Entregador e = entregadores.stream().filter(Entregador::isDisponivel).findFirst().orElse(null);
+                if(e != null) {
+                    p.setEntregador(e);
+                    p.setStatus("Saiu para Entrega");
                 }
-
-                Produto produtoSelecionado = null;
-                for(Produto p : listaProdutos) {
-                    if(p.getCodigo() == codBusca) produtoSelecionado = p;
-                }
-
-                if(produtoSelecionado != null) {
-                    System.out.print("Quantidade de '" + produtoSelecionado.getNome() + "': ");
-                    int qtd = scanner.nextInt(); scanner.nextLine();
-                    novoPedido.adicionarItem(new ItemPedido(produtoSelecionado, qtd));
-                    System.out.println("✅ Item adicionado ao carrinho!");
-                } else {
-                    System.out.println("❌ Produto não encontrado.");
-                }
+                
+                // NOVO: Persiste o pedido no banco de dados usando o DAO
+                pedidoDAO.inserir(p);
+                
+                listaPedidos.add(p);
+                System.out.println("✅ Pedido Criado!");
+                System.out.println(p); // Calcula total via interface Calculavel automaticamente
             }
-            
-            // Se tiver entregador cadastrado, vincula o primeiro
-            if (!listaEntregadores.isEmpty()) {
-                novoPedido.setEntregador(listaEntregadores.get(0));
-                novoPedido.setStatus("Saiu para Entrega");
-            }
-
-            listaPedidos.add(novoPedido);
-            System.out.println("\n✅ Pedido finalizado com sucesso!");
-            System.out.println(novoPedido.toString());
-
-        } else if (op == 2) {
-            System.out.println("\n--- LISTA DE PEDIDOS ---");
-            if (listaPedidos.isEmpty()) System.out.println("Nenhum pedido registrado.");
-            for (Pedido p : listaPedidos) {
-                System.out.println("Pedido #" + p.getNumeroPedido() + " | Cliente: " + p.getCliente().getNome() + " | Status: " + p.getStatus() + " | Total: R$" + String.format("%.2f", p.calcularTotal()));
-            }
-        } else if (op == 3) {
-            System.out.print("Número do pedido a atualizar status: ");
-            int num = scanner.nextInt(); scanner.nextLine();
-            for(Pedido p : listaPedidos) {
-                if(p.getNumeroPedido() == num) {
-                    System.out.print("Novo Status (Ex: Em preparo, Entregue): ");
-                    p.setStatus(scanner.nextLine());
-                    System.out.println("✅ Status atualizado!"); return;
-                }
-            }
-            System.out.println("❌ Pedido não encontrado.");
-        } else if (op == 4) {
-            System.out.print("Número do pedido a excluir: ");
-            int num = scanner.nextInt(); scanner.nextLine();
-            if(listaPedidos.removeIf(p -> p.getNumeroPedido() == num)) System.out.println("✅ Pedido excluído!");
-            else System.out.println("❌ Pedido não encontrado.");
         }
     }
 
-    // ==========================================
-    // 6. RELATÓRIOS
-    // ==========================================
     private static void gerarRelatorios() {
-        System.out.println("\n===== RELATÓRIO GERAL =====");
-
-        ClienteDAO cliDao = new ClienteDAO();
-        List<Cliente> clientesNoBanco = cliDao.listarTodos();
-
-        RestauranteDAO restDao = new RestauranteDAO();
-        List<Restaurante> restaurantesNoBanco = restDao.listarTodos();
-
-        System.out.println("Total de Restaurantes (no BD): " + restaurantesNoBanco.size());
-        System.out.println("Total de Clientes (no BD): " + clientesNoBanco.size());
-        System.out.println("Total de Produtos: " + listaProdutos.size());
-        System.out.println("Total de Entregadores: " + listaEntregadores.size());
-        System.out.println("Total de Pedidos Realizados: " + listaPedidos.size());
+        System.out.println("\n===== RELATÓRIO FINAL CP4 =====");
+        System.out.println("Pedidos Total: " + listaPedidos.size());
+        listaPedidos.forEach(p -> System.out.println("Pedido #" + p.getNumeroPedido() + " | Valor Final: R$ " + String.format("%.2f", p.calcularTotal())));
     }
 }
